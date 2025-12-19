@@ -47,3 +47,28 @@ def ppm_error(oberve, mwb, mwy):
 def gaussian_similarity(observe, theory, sigma=0.4):
     sim = np.exp(-(theory - observe)**2 / (2 * sigma**2))
     return sim
+
+def plotMsMs(ax, df, colors,percent):
+    df_color = df[df["color"] == colors] 
+    if colors == "black":
+        zorders = 1
+    else:
+        zorders = 2
+    if percent:
+        ax.vlines(df_color.mzs, 
+                0, 
+                df_color.relative_abundance, 
+                colors=colors, 
+                zorder=zorders,
+                linestyles='solid',
+                lw = 1)
+        return ax
+    else:
+        ax.vlines(df_color.mzs, 
+                0, 
+                df_color.ints, 
+                colors=colors, 
+                zorder=zorders,
+                linestyles='solid',
+                lw = 1)
+        return ax

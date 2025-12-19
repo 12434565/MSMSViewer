@@ -10,3 +10,12 @@
 4. <S>html website(?)</S>
 5. <S><5% no add b and y</S>
 6. df.loc[df["mzs"] == mzs_i, "ppm"] change to df.loc[i, "ppm"]
+
+# need to correct 
+1. df.loc[df["mzs"] == mzs_i, "ppm"] -> 不要用这种配对
+2. <S>y坐标变长,或者换成新的</S>
+3. <S>先画黑的再画红的</S>
+4. <S>用y盖b</S>
+5. <s>ppm改成50</s>
+6. <s>一个画布上两张图</S>
+

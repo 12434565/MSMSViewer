@@ -4,7 +4,7 @@ from array import array
 from model import msms
 import pandas as pd
 import numpy as np
-from model1 import ppm_error, gaussian_similarity, cal_theory_masses, getd3, get_peaks_from_xml
+from model1 import ppm_error, gaussian_similarity, cal_theory_masses, getd3, get_peaks_from_xml,plotMsMs
 
 import matplotlib.pyplot as plt
 
@@ -69,19 +69,19 @@ for mw_i in massb+massy:
             continue
         if sim > 0.9:
             # print(f"Found matching b-ion: {mwb_i} ~ {mzs_i}")
-            index2 = df2.loc[df2["mwb"] == mw_i, "b_index"]
+            index2 = df2.loc[df2["mwy"] == mw_i, "y_index"]
             if index2.empty:
-                index2 = df2.loc[df2["mwy"] == mw_i, "y_index"]
+                index2 = df2.loc[df2["mwb"] == mw_i, "b_index"]
             df.loc[df["mzs"] == mzs_i, "gaussian_sim_match"] = index2.values[0]
 
 # calculate ppm
 for mzs_i in mzs:
     ppm = ppm_error(mzs_i, massb, massy)
-    if ppm[0] < 100:
+    if ppm[0] < 50:
         df.loc[df["mzs"] == mzs_i, "ppm"] = ppm[0]
-        index2 = df2.loc[df2["mwb"] == ppm[1], "b_index"]
+        index2 = df2.loc[df2["mwy"] == ppm[1], "y_index"]
         if index2.empty:
-            index2 = df2.loc[df2["mwy"] == ppm[1], "y_index"]
+            index2 = df2.loc[df2["mwb"] == ppm[1], "b_index"]
         if df.loc[df["mzs"] == mzs_i, "relative_abundance"].values[0]<5:
             continue
         df.loc[df["mzs"] == mzs_i, "ppm_match"] = index2.values[0]
@@ -90,13 +90,13 @@ for mzs_i in mzs:
 
 # add color
 for i in df.ppm_match.index:
-    if df.loc[i, "ppm_match"] != "":
+    if df.loc[i, "ppm_match"] == "":
+        df.loc[i, "color"] = "black"
+    else:
         if df.loc[i, "ppm_match"].startswith("b"):
             df.loc[i, "color"] = "blue"
         else:
             df.loc[i, "color"] = "red"
-    else:
-        df.loc[i, "color"] = "black"
 pd.set_option("display.max_rows", 200)
 print(df)
 
@@ -120,14 +120,30 @@ print(df)
 x = df.mzs
 y = df.relative_abundance
 fig, ax = plt.subplots()
-ax.vlines(x, 0, y,
-       colors= df.color, 
-       linestyles='solid',
-       label='',
-       lw = 1)
-ax.set(ylim = (0,100),xlabel='m/z', ylabel='Relative Abundance (%)')
+fig, (ax1, ax2) = plt.subplots(
+    nrows=2,
+    ncols=1,
+    figsize=(8,9.6),
+    sharex=True)
+
+fig.suptitle(
+    f"Annotated MS/MS Spectrum of\n{num} {aaseq})",
+    fontsize=16,
+    fontweight="bold",
+    y=0.98
+)
+plotMsMs(ax1, df, "black", True)
+plotMsMs(ax1, df, "blue", True)
+plotMsMs(ax1, df, "red", True)
+
+# ax.vlines(x, 0, y,
+#        colors= df.color, 
+#        linestyles='solid',
+#        label='',
+#        lw = 1)
+ax1.set(ylim = (0,105),xlabel='m/z', ylabel='Relative Abundance (%)')
 for _, row in df.dropna(subset=["ppm_match"]).iterrows():
-    ax.text(
+    ax1.text(
         row["mzs"],                      
         row["relative_abundance"] + 1,   
         row["ppm_match"],                
@@ -136,14 +152,37 @@ for _, row in df.dropna(subset=["ppm_match"]).iterrows():
         fontsize=8,
         color=row["color"]
     )
-ax.set_title(
-    f"Annotated MS/MS Spectrum of \n{num} {aaseq}",
-    fontsize=14,
-    fontweight="bold",
-    pad=10
-)
+# ax1.set_title(
+#     f"Annotated MS/MS Spectrum of \n{num} {aaseq}",
+#     fontsize=14,
+#     fontweight="bold",
+#     pad=10
+# )
+
+
+plotMsMs(ax2, df, "black", False)
+plotMsMs(ax2, df, "blue", False)
+plotMsMs(ax2, df, "red", False)
+max = df["ints"].max() + int(df["ints"].max()*0.05)
+ax2.set(ylim = (0,max),xlabel='m/z', ylabel='init')
+for _, row in df.dropna(subset=["ppm_match"]).iterrows():
+    ax2.text(
+        row["mzs"],                      
+        row["ints"] + 1,   
+        row["ppm_match"],                
+        ha="center",
+        va="bottom",
+        fontsize=8,
+        color=row["color"]
+    )
+# ax2.set_title(
+#     f"Annotated MS/MS Spectrum of \n{num} {aaseq}",
+#     fontsize=14,
+#     fontweight="bold",
+#     pad=10
+# )
 plt.tight_layout()
-fig_name = f"/home/student/sf_sharedFolders/project/msms2_{num}_{aaseq[:8]}.png"
+fig_name = f"/home/student/sf_sharedFolders/project_v2/msms2_{num}_{aaseq[:8]}.png"
 plt.savefig(fig_name, dpi = 1000)
 
 # html
