@@ -30,26 +30,46 @@ def getd3():
       "Y":163.06333,"W":186.07931}   
     return d3
 
-def cal_theory_masses(b,massb,d3,x=1):
+def cal_theory_masses(b,d3,x=1):
+    mass = []
     for i,seq in enumerate(b):
+        mz = 0
         for j in seq:
             if j in d3:
-                massb[i] = float(massb[i]) + float(d3[j])
-        massb[i] = massb[i] + x
-    return massb
+                mz = float(mz) + float(d3[j])
+        mz = mz + x
+        if x == 1:
+            mass.append((mz, f"b{i+1}"))
+        elif x == 19:
+            mass.append((mz,f"y{len(b)-i}"))
+    return mass
                 
-def ppm_error(oberve, mwb, mwy):
+def ppm_error(oberve, massb, massy):
     ppm = []
-    for theory in mwb+mwy:
-        ppm.append(((abs(theory - oberve) / theory * 1e6), theory))
+    for theory, label_y in massy:
+        ppm.append(((abs(theory - oberve) / theory * 1e6), label_y))
+    if min(ppm)[0] > 50:
+        for theory, label_b in massb:
+            ppm.append(((abs(theory - oberve) / theory * 1e6), label_b))
     return min(ppm)
 
 def gaussian_similarity(observe, theory, sigma=0.4):
     sim = np.exp(-(theory - observe)**2 / (2 * sigma**2))
     return sim
 
-def plotMsMs(ax, df, colors,percent):
-    df_color = df[df["color"] == colors] 
+def addcolor(df, methods, colorColumnName):
+    for i in df.index:
+        if df.loc[i, methods] == "":
+            df.loc[i, colorColumnName] = "black"
+        else:
+            if df.loc[i, methods].startswith("b"):
+                df.loc[i, colorColumnName] = "blue"
+            else:
+                df.loc[i, colorColumnName] = "red"
+    return df
+
+def plotMsMs(ax, df, colors,percent, colorColumnName):
+    df_color = df[df[colorColumnName] == colors] 
     if colors == "black":
         zorders = 1
     else:
@@ -72,3 +92,35 @@ def plotMsMs(ax, df, colors,percent):
                 linestyles='solid',
                 lw = 1)
         return ax
+    
+def draw_plot(ax, df,  
+              ycolumn_name, # "relative_abundance" or "ints"
+              colorColumnName, # "color" or "color_gs"
+              method_score_column_name, # "ppm_match" or "gaussian_sim_match"
+              ylabel_a, # "Relative Abundance (%)" or "init"
+              percent, # True or False
+              title=None,
+              xlabel_a="m/z"):
+    max = int(df[ycolumn_name].max()) + int(df[ycolumn_name].max()*0.05)
+    plotMsMs(ax, df, "black", percent, colorColumnName)
+    plotMsMs(ax, df, "blue", percent, colorColumnName)
+    plotMsMs(ax, df, "red", percent, colorColumnName)
+    ax.set(ylim = (0,max), ylabel= ylabel_a)
+    for _, row in df.dropna(subset=[colorColumnName]).iterrows():
+        ax.text(
+            row["mzs"],                      
+            row[ycolumn_name] + 1,   
+            row[method_score_column_name],                
+            ha="center",
+            va="bottom",
+            fontsize=8,
+            color=row[colorColumnName]
+        )
+    if title != None:
+        ax.set_title(
+            f"{title}",
+            fontsize=12,
+            fontweight="bold",
+            pad=10
+        )
+    return ax
