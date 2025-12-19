@@ -44,14 +44,18 @@ def cal_theory_masses(b,d3,x=1):
             mass.append((mz,f"y{len(b)-i}"))
     return mass
                 
-def ppm_error(oberve, massb, massy):
-    ppm = []
+def ppm_error(observe, massb, massy, bound):
+    ppm_y = []
+    ppm_b = []
     for theory, label_y in massy:
-        ppm.append(((abs(theory - oberve) / theory * 1e6), label_y))
-    if min(ppm)[0] > 50:
-        for theory, label_b in massb:
-            ppm.append(((abs(theory - oberve) / theory * 1e6), label_b))
-    return min(ppm)
+        ppm_y.append(((abs(theory - observe) / theory * 1e6), label_y))
+    for theory, label_b in massb:
+        ppm_b.append(((abs(theory - observe) / theory * 1e6), label_b))
+    best_y = min(ppm_y, key=lambda x: x[0])
+    best_b = min(ppm_b, key=lambda x: x[0])
+    if (best_y[0] - bound) > best_b[0]:
+        return best_b
+    return best_y
 
 def gaussian_similarity(observe, theory, sigma=0.4):
     sim = np.exp(-(theory - observe)**2 / (2 * sigma**2))

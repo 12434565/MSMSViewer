@@ -19,4 +19,8 @@
 5. <s>ppm改成50</s>
 6. <s>一个画布上两张图</S>
 
-1. 加differences作为第三种比较情况
+1. 加differences作为第三种比较情况()
+---
+V4
+1. change ppm and gs b and y compare part
+2. add --help to chack the input

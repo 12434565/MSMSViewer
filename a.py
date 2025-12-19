@@ -5,13 +5,36 @@ from model import msms
 import pandas as pd
 import numpy as np
 from model1 import ppm_error, gaussian_similarity, cal_theory_masses, getd3, get_peaks_from_xml,plotMsMs, addcolor, draw_plot
-
 import matplotlib.pyplot as plt
+import argparse
 
 sigma = 0.4
-filename = sys.argv[1] # 17mix_test2.mzxml
-num = int(sys.argv[2])  # 1298
-aaseq = sys.argv[3]  # TYDSYLGDDYVR
+bound = 10
+# check input
+parser = argparse.ArgumentParser(description="Draw MS/MS Figures")
+
+parser.add_argument(
+    '-f','--xml',
+    type = str,
+    required = True,
+    help = 'mzXML File is Required.'
+)
+parser.add_argument(
+    '-n','--scan_number',
+    type = int,
+    required = True,
+    help = 'SCAN Number is Required.'
+)
+parser.add_argument(
+    '-s', '--amino_acid_sequence',
+    type = str,
+    required = True,
+    help = 'Amino Acid Sequence is Required.'
+)
+args = parser.parse_args()
+filename = args.xml # 17mix_test2.mzxml
+num = args.scan_number  # 1298
+aaseq = args.amino_acid_sequence  # TYDSYLGDDYVR
 
 peakselt = msms()
 peakselt.text = get_peaks_from_xml("17mix_test2.mzxml", num).text
@@ -60,31 +83,35 @@ d["color"] = [""]*len(mzs)
 
 df = pd.DataFrame(data=d)
 
+
 # calculate gaussian similarity
+
 for index, mzs_i in enumerate(mzs):
-    sim = []
+    sim_y = []
+    sim_b = []
     if df.loc[index, "relative_abundance"]<5:
             continue
     for mw_i in massy:    
-        sim.append((gaussian_similarity(mw_i[0], mzs_i, sigma=0.4), mw_i[1]))
-    index2 = max(sim, key=lambda x: x[0])
-    if max(sim, key=lambda x: x[0])[0] < 0.999:
-        sim2=[]
-        for mw_i in massb:
-            sim2.append((gaussian_similarity(mw_i[0], mzs_i, sigma=0.4),mw_i[1]))
-        if max(sim2, key=lambda x: x[0])[0] < 0.999:
-            continue
-        else:
-            index2 = max(sim2, key=lambda x: x[0])
+        sim_y.append((gaussian_similarity(mw_i[0], mzs_i, sigma=0.4), mw_i[1]))
+    for mw_i in massb:
+        sim_b.append((gaussian_similarity(mw_i[0], mzs_i, sigma=0.4),mw_i[1]))
+    best_y = max(sim_y, key=lambda x: x[0])
+    best_b = max(sim_b, key=lambda x: x[0])
+    index2 = best_y
+    if (best_b[0] - best_y[0])>0.001:
+        index2 = best_b
+    elif abs(best_b[0] - best_y[0]) < 0.001:
+        index2 = best_y
+    if index2[0]<0.999:
+        continue
+    print(f"Found matching: {best_y[0]} ~ {best_b[0]}, \nmax one is {index2[1]}\ncompare with {mzs_i} index is {index}")
     df.loc[index, "gaussian_sim_match"] = index2[1]
     df.loc[index, "gs"] = index2[0]
-    # print(f"Found matching b-ion: {mwb_i} ~ {mzs_i}")
-            
-            
+
 
 # calculate ppm
 for index, mzs_i in enumerate(mzs):
-    ppm = ppm_error(mzs_i, massb, massy)
+    ppm = ppm_error(mzs_i, massb, massy, bound)
     if df.loc[index, "relative_abundance"]<5:
             continue
     if ppm[0] < 50:
@@ -148,7 +175,7 @@ draw_plot(ax4,
 
 
 plt.tight_layout()
-fig_name = f"/home/student/sf_sharedFolders/project_v3/msms2_{num}_{aaseq[:8]}.png"
+fig_name = f"/home/student/sf_sharedFolders/project_v4_compare_mutiple_tb/msms2_{num}_{aaseq[:8]}.png"
 plt.savefig(fig_name, dpi = 1000)
 
 # html

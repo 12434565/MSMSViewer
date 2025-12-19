@@ -1,17 +1,17 @@
-python a.py 17mix_test2.mzxml 1298
+python a.py -f 17mix_test2\.mzxml 1298
 
-python a.py 17mix_test2.mzxml 1301 TYDSYLGDDYVR
-python a.py 17mix_test2.mzxml 1298 TYDSYLGDDYVR
-python a.py 17mix_test2.mzxml 845  AAQKPDVLTTGGGNPVGDK
-python a.py 17mix_test2.mzxml 1505 LITAIGDVVNHDPVVGDR
-python a.py 17mix_test2.mzxml 1506 LITAIGDVVNHDPVVGDR
-python a.py 17mix_test2.mzxml 1290 HSTVFDNLPNPEDR
-python a.py 17mix_test2.mzxml 1504 LITAIGDVVNHDPVVGDR
-python a.py 17mix_test2.mzxml 1508 LITAIGDVVNHDPVVGDR
-python a.py 17mix_test2.mzxml 1503 LITAIGDVVNHDPVVGDR
-python a.py 17mix_test2.mzxml 1013 IGDGMGDSEITAAR
-python a.py 17mix_test2.mzxml 1455 HADSVAELGEQIDNLQR
-python a.py 17mix_test2.mzxml 1507 LITAIGDVVNHDPVVGDR
-python a.py 17mix_test2.mzxml 1293 HSTVFDNLPNPEDR
-python a.py 17mix_test2.mzxml 1297 ITAIGDVVNHDPVVGDR
-python a.py 17mix_test2.mzxml 1598 ESGYPQVFYGDMYGTK
+python a.py -f 17mix_test2\.mzxml -n 1301 -s TYDSYLGDDYVR
+python a.py -f 17mix_test2\.mzxml -n 1298 -s TYDSYLGDDYVR
+python a.py -f 17mix_test2\.mzxml -n 845  -s AAQKPDVLTTGGGNPVGDK
+python a.py -f 17mix_test2\.mzxml -n 1505 -s LITAIGDVVNHDPVVGDR
+python a.py -f 17mix_test2\.mzxml -n 1506 -s LITAIGDVVNHDPVVGDR
+python a.py -f 17mix_test2\.mzxml -n 1290 -s HSTVFDNLPNPEDR
+python a.py -f 17mix_test2\.mzxml -n 1504 -s LITAIGDVVNHDPVVGDR
+python a.py -f 17mix_test2\.mzxml -n 1508 -s LITAIGDVVNHDPVVGDR
+python a.py -f 17mix_test2\.mzxml -n 1503 -s LITAIGDVVNHDPVVGDR
+python a.py -f 17mix_test2\.mzxml -n 1013 -s IGDGMGDSEITAAR
+python a.py -f 17mix_test2\.mzxml -n 1455 -s HADSVAELGEQIDNLQR
+python a.py -f 17mix_test2\.mzxml -n 1507 -s LITAIGDVVNHDPVVGDR
+python a.py -f 17mix_test2\.mzxml -n 1293 -s HSTVFDNLPNPEDR
+python a.py -f 17mix_test2\.mzxml -n 1297 -s ITAIGDVVNHDPVVGDR
+python a.py -f 17mix_test2\.mzxml -n 1598 -s ESGYPQVFYGDMYGTK
